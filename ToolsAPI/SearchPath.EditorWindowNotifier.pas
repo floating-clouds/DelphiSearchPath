@@ -175,8 +175,7 @@ procedure TEditServiceNotifier.WindowActivated(const EditWindow: INTAEditWindow)
 begin
 end;
 
-procedure TEditServiceNotifier.WindowCommand(const EditWindow: INTAEditWindow; Command, Param: Integer;
-  var Handled: Boolean);
+procedure TEditServiceNotifier.WindowCommand(const EditWindow: INTAEditWindow; Command, Param: Integer; var Handled: Boolean);
 begin
 end;
 

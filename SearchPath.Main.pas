@@ -17,20 +17,14 @@ type
     procedure OutputMessage(strText: string); overload;
     procedure OutputMessage(strText, StrFileName, StrPrefix: string; ILine, ICol: Integer); overload;
     procedure OutputMessage(AText: string; MessageContext: TMessageContext); overload;
-
-    procedure SetLogLevel(ALogLevel: TLogLevel);
-    function GetLogLevel: TLogLevel;
   private
     const MESSAGE_GROUP_NAME = 'Search Path';
   private
-    FLogLevel: TLogLevel;
     function GetEditorText(Stream: TStream): string;
     function GetCurrentProject: string;
   public
     constructor Create;
-    property LogLevel: TLogLevel read GetLogLevel write SetLogLevel;
-  public
-    class destructor Destroy;
+    destructor Destroy;
   end;
 
   var SearchPathManager: ISearchPathManager;
@@ -52,11 +46,9 @@ procedure Register;
 begin
   Config := TConfig.Create;
   SearchPathManager := TSearchPathManager.Create;
-  RegisterWizard(SearchPathManager);
-  RegisterEditorWindowNotifier(SearchPathManager);
 end;
 
-{ TSearchPath }
+{ TSearchPathManager }
 
 procedure TSearchPathManager.OutputMessage(AText: string; MessageContext: TMessageContext);
 var
@@ -125,17 +117,13 @@ begin
   Result := Module.FileName;
 end;
 
-function TSearchPathManager.GetLogLevel: TLogLevel;
-begin
-  Result := FLogLevel;
-end;
-
 constructor TSearchPathManager.Create;
 begin
-
+  RegisterWizard(Self);
+  RegisterEditorWindowNotifier(Self);
 end;
 
-class destructor TSearchPathManager.Destroy;
+destructor TSearchPathManager.Destroy;
 begin
 //  var Svc := BorlandIDEServices As IOTAMessageServices;
 //  var G := Svc.GetGroup(MESSAGE_GROUP_NAME);
@@ -204,11 +192,6 @@ end;
 procedure TSearchPathManager.OutputMessage(strText: String);
 begin
   (BorlandIDEServices As IOTAMessageServices).AddTitleMessage(strText);
-end;
-
-procedure TSearchPathManager.SetLogLevel(ALogLevel: TLogLevel);
-begin
-  FLogLevel := ALogLevel;
 end;
 
 procedure TSearchPathManager.ShowMessageView(const ClearView: Boolean);

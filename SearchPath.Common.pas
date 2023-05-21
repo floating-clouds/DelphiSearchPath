@@ -71,10 +71,6 @@ type
     Procedure OutputMessage(strText : string); overload;
     Procedure OutputMessage(strText, strFileName, strPrefix : string; iLine, iCol : Integer); overload;
     procedure OutputMessage(AText: string; MessageContext: TMessageContext); overload;
-    procedure SetLogLevel(ALogLevel: TLogLevel);
-    function GetLogLevel: TLogLevel;
-
-    property LogLevel: TLogLevel read GetLogLevel write SetLogLevel;
   end;
 
   function RectToString(R: TRect): string;
