@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project ver="1.0" logLevel="info">   <!-- debug,info,warn,error -->
+    <!-- 代理配置，如果没有配置则不使用代理，如果配置了系统代理，代理也会被使用 -->
+    <!-- 过滤器部分还没有实现，enabled可以配置，也可以省略，省略默认是true
+    <proxy host="192.168.168.143" port="7890" user="" password="" enabled="true">
+        <includes>
+            <include>github.com</include>
+            <include>my.github.com</include>
+        </includes>
+        <excludes>
+            <exclude>git.teclick.com</exclude>
+            <exclude>my.git.teclick.com</exclude>
+        </excludes>
+    </proxy>
+    -->
+    <!-- 下面的配置还没有实现，初步的打算是使用 maven 的私服的方式管理代码
+    <repositories>
+        <repository id="central" name="libs-release">
+          http://localhost:8081/artifactory/libs-release/
+        </repository>
+    </repositories>
+    -->
+    <!-- 已经处理，但还不知有什么用
+    <properties>
+        <delphi_package>1.7</delphi_package>
+    </properties>
+    -->
+
+    <!-- 要添加到 search path 的代码包 -->
+    <!-- 你可以在系统的环境变量配置 delphi-libs 指向一个目录，下面代码在下载的时候会下载到你指定的目录 -->
+    <!-- 你还可以在 Delphi IDE 的 Tools, Options, IDE, Environment Variables 处配置 delphi-libs -->
+    <!-- 按照 IDE 的规则，IDE 中的配置优于系统环境变量 -->
+    <!-- 如果没有配置则代码会放到项目的目录中的 Libs 中 -->
+    <dependencies>
+        <dependency>
+            <group>exilon</group>
+            <artifactId>QuickLogger</artifactId>
+            <version>9ca07ddcd15af4ec82eed54cdf17e639e6e96782</version>
+            <compileVersion></compileVersion>
+            <searchPath>
+                <path>.</path>
+            </searchPath>
+            <!-- 下面的配置决定代码从哪儿下载 -->
+            <!-- 如果不配置会按照 maven 私服的 URL 规则处理 -->
+            <!-- $(group)，$(artifactId)，$(version)占位符会按照配置替换，也可以写绝对 URL 的路径 -->
+            <repo>https://github.com/$(group)/$(artifactId)/archive/$(version).zip</repo>
+        </dependency>
+        <dependency>
+            <group>exilon</group>
+            <artifactId>QuickLib</artifactId>
+            <version>3b4071a11c48f41788805f675d394079328f33c2</version>
+            <searchPath>
+                <path>.</path>
+            </searchPath>
+            <!-- 下面的配置决定代码从哪儿下载 -->
+            <!-- 如果不配置会按照 maven 私服的 URL 规则处理 -->
+            <!-- $(group)，$(artifactId)，$(version)占位符会按照配置替换，也可以写绝对 URL 的路径 -->
+            <repo>https://github.com/$(group)/$(artifactId)/archive/$(version).zip</repo>
+        </dependency>
+    </dependencies>
+</project>

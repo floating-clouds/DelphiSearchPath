@@ -1,0 +1,94 @@
+object FormOptions: TFormOptions
+  Left = 0
+  Top = 0
+  Caption = 'Options'
+  ClientHeight = 350
+  ClientWidth = 550
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -10
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = True
+  Position = poDesktopCenter
+  OnCreate = FormCreate
+  PixelsPerInch = 120
+  TextHeight = 12
+  object Splitter1: TSplitter
+    Left = 218
+    Top = 22
+    Height = 313
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+  end
+  object ToolBar1: TToolBar
+    Left = 0
+    Top = 0
+    Width = 550
+    Height = 22
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+    AutoSize = True
+    ButtonWidth = 8
+    EdgeInner = esNone
+    EdgeOuter = esNone
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Top = 335
+    Width = 550
+    Height = 15
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+    Panels = <>
+  end
+  object TreeView1: TTreeView
+    Left = 0
+    Top = 22
+    Width = 218
+    Height = 313
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+    Align = alLeft
+    Indent = 15
+    TabOrder = 0
+  end
+  object Panel1: TPanel
+    Left = 221
+    Top = 22
+    Width = 329
+    Height = 313
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 2
+  end
+  object ActionImages: TVirtualImageList
+    DisabledGrayscale = False
+    DisabledSuffix = '_Disabled'
+    Images = <>
+    Width = 13
+    Height = 13
+    Left = 300
+    Top = 77
+  end
+  object ActionList1: TActionList
+    Left = 436
+    Top = 77
+  end
+end

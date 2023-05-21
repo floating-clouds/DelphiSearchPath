@@ -1,0 +1,50 @@
+package SearchPath;
+
+{$R *.res}
+{$R *.dres}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS OFF}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO OFF}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE RELEASE}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'Delphi search path setting tools'}
+{$DESIGNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  designide,
+  rtl,
+  vcl;
+
+contains
+  SearchPath.Main in 'SearchPath.Main.pas',
+  SearchPath.Options in 'SearchPath.Options.pas' {FormOptions},
+  SearchPath.Wizard in 'ToolsAPI\SearchPath.Wizard.pas',
+  SearchPath.EditorWindowNotifier in 'ToolsAPI\SearchPath.EditorWindowNotifier.pas',
+  SearchPath.CustomMessage in 'ToolsAPI\SearchPath.CustomMessage.pas',
+  SearchPath.Project in 'SearchPath.Project.pas',
+  SearchPath.XMLDocument in 'SearchPath.XMLDocument.pas',
+  SearchPath.Common in 'SearchPath.Common.pas',
+  SearchPath.Config in 'SearchPath.Config.pas';
+
+end.
+

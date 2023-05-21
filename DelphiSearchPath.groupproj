@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A24F5064-DBC1-4DD2-8E22-515A41DED59A}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="SearchPath.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="SearchPath">
+        <MSBuild Projects="SearchPath.dproj"/>
+    </Target>
+    <Target Name="SearchPath:Clean">
+        <MSBuild Projects="SearchPath.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SearchPath:Make">
+        <MSBuild Projects="SearchPath.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="SearchPath"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="SearchPath:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="SearchPath:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
