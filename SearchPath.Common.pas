@@ -67,6 +67,7 @@ type
   ISearchPathManager = interface(IInterface)
     ['{D54079EB-53E4-4389-81D8-6F6EE84C9850}']
     procedure OnButtonClick(Sender: TObject; ActionType: TActionType);
+    procedure OnProjectRename(const OldFileName, NewFileName: string);
     procedure ShowMessageView(const ClearView: Boolean);
     Procedure OutputMessage(strText : string); overload;
     Procedure OutputMessage(strText, strFileName, strPrefix : string; iLine, iCol : Integer); overload;

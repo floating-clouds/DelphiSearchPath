@@ -159,7 +159,6 @@ type
     FName: string;
     FLibPaths: TLibPaths;
     FRepo: string;
-    function HttpDownload(const URL, DownloadDir: string): string;
     procedure Unzip(const ZipFile, FilesRoot: string);
   public
     destructor Destroy; override;
@@ -205,6 +204,7 @@ type
   strict private
     FRepositories: TList<TRepository>;
   public
+    constructor Create(AProject: TProject; AElement: PsanXMLObjElement);
     destructor Destroy; override;
     procedure Parse;
 
@@ -234,7 +234,7 @@ type
     procedure ParseProperties;
     procedure ParseProxy;
   public
-    constructor Create(AParent: TProject; AProjectName: string); overload;
+    constructor Create(AParent: TProject; AProjectName: string);
     destructor Destroy; override;
     procedure Parse;
 
@@ -255,7 +255,7 @@ type
 
   TProjects = class
   strict private
-    FProjectName: string;
+    FRootProject: TProject;
     FSearchPath: ISearchPathManager;
     FProjects: TDictionary<string, TProjectMapping>;
     procedure Init;
@@ -266,7 +266,6 @@ type
   public
     constructor Create(ASearchPathManager: ISearchPathManager);
     destructor Destroy; override;
-    function ToString: string; override;
 
     procedure Parse(const AProjectName: string = '');
     procedure UpdateProjectLibs(const AProjectName: string = '');
@@ -390,10 +389,10 @@ end;
 procedure TProject.ParseRepositories;
 begin
   var RepositoriesElement := GetElement(REPOSITORIES_KEY);
+  FRepositories := TRepositories.Create(Self, RepositoriesElement);
   if RepositoriesElement <> nil then begin
-    FRepositories := TRepositories.Create(Self, RepositoriesElement);
     FRepositories.Parse;
-  end else FRepositories := nil;
+  end;
 end;
 
 function TDocumentBase.ChildCount: Integer;
@@ -587,74 +586,95 @@ begin
   inherited;
 end;
 
-function TDependencie.HttpDownload(const URL, DownloadDir: string): string;
-var
-  Http: THttpClient;
-  Stream: TFileStream;
-begin
-  Result := TPath.Combine(DownloadDir, FVersion) + '.' + FType;
+procedure TDependencie.DownloadPackage;
 
-  if not TFile.Exists(Result) then begin
-    if not TDirectory.Exists(DownloadDir) then begin
-      ForceDirectories(DownloadDir);
-    end;
+  function HttpDownload(const URL, DownloadDir: string): string;
+  var
+    Http: THttpClient;
+    Stream: TFileStream;
+  begin
+    Info('Begin download "%s"', [URL]);
 
-    Http := THttpClient.Create;
-    try
-      Http.ConnectionTimeout := 10;
-      Http.UserAgent := 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59';
-      if (Project.Proxy <> nil) and Project.Proxy.Enabled then begin
-        http.ProxySettings.Create(Project.Proxy.Host, Project.Proxy.port, Project.Proxy.UnitName, Project.Proxy.Password);
+    Result := TPath.Combine(DownloadDir, FVersion) + '.' + FType;
+
+    if not TFile.Exists(Result) then begin
+      if not TDirectory.Exists(DownloadDir) then begin
+        ForceDirectories(DownloadDir);
       end;
 
-      var tmpFile := ChangeFileExt(Result, '.tmp');
-      if TFile.Exists(tmpFile) then
-        TFile.Delete(tmpFile);
-      Stream := TFileStream.Create(tmpFile, fmCreate);
+      Http := THttpClient.Create;
       try
+        Http.ConnectionTimeout := 10;
+        Http.UserAgent := 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59';
+        if (Project.Proxy <> nil) and Project.Proxy.Enabled then begin
+          http.ProxySettings.Create(Project.Proxy.Host, Project.Proxy.port, Project.Proxy.UnitName, Project.Proxy.Password);
+        end;
+
+        var tmpFile := ChangeFileExt(Result, '.tmp');
         try
-          var Response := Http.Get(URL, Stream);
-          for var h in Response.Headers do begin
-            Debug('Response head: %s=%s', [h.Name, h.Value]);
+          if TFile.Exists(tmpFile) then
+            TFile.Delete(tmpFile);
+
+          Stream := TFileStream.Create(tmpFile, fmCreate);
+          try
+            var Response := Http.Get(URL, Stream);
+            for var h in Response.Headers do begin
+              Debug('Response head: %s=%s', [h.Name, h.Value]);
+            end;
+          finally
+            FreeAndNil(Stream);
           end;
+          TFile.Move(tmpFile, Result);
         except
           on NetExcept: ENetHTTPClientException do begin
+            TFile.Delete(tmpFile);
             Error(NetExcept.Message);
           end;
         end;
       finally
-        FreeAndNil(Stream);
+        FreeAndNil(Http);
       end;
-      TFile.Move(tmpFile, Result);
-    finally
-      FreeAndNil(Http);
-    end;
-  end else Info('Download file exists "%s", skipped', [Result]);
-end;
+    end else Info('Download file exists "%s", skipped', [Result]);
+    Info('End download "%s"', [URL]);
+  end;
 
-procedure TDependencie.DownloadPackage;
+  function ResolveURL(const Repo: string): string;
+  begin
+    var LRepo := Repo.Replace('\', '/',[rfReplaceAll]);
+    var URL := LRepo.Replace('$(group)', FGroup.Replace('.', '/', [rfReplaceAll]), [rfReplaceAll, rfIgnoreCase]);
+    URL := URL.Replace('$(artifactId)', ArtifactId, [rfReplaceAll, rfIgnoreCase]);
+    URL := URL.Replace('$(version)', FVersion, [rfReplaceAll, rfIgnoreCase]);
+    URL := URL.Replace('$(compileVersion)', FVersion, [rfReplaceAll, rfIgnoreCase]);
+    URL := URL.Replace('$(type)', FType, [rfReplaceAll, rfIgnoreCase]);
+    Result := URL;
+  end;
 
   function Download(DownloadDir: string; var ZipFile: string): Boolean;
   var
     LRepo: string;
   begin
-    for var R in Project.Repositories do begin
-      if FRepo.IsEmpty then begin
+    if FRepo.IsEmpty then begin
+      Result := False;
+      for var R in Project.Repositories do begin
         LRepo := iif(R.URL.EndsWith('/'), R.URL, R.URL + '/') + FPath + '/' + FName;
-      end else begin
-        LRepo := FRepo;
-      end;
-      LRepo := LRepo.Replace('\', '/',[rfReplaceAll]);
 
+        try
+          var URL := ResolveURL(LRepo);
+          ZipFile := HttpDownload(URL, DownloadDir);
+          Result := True;
+        except
+          on E: Exception do begin
+            Error('Download file error: %s', [E.Message]);
+            Result := False;
+          end;
+        end;
+
+        if Result then Break;
+      end;
+    end else begin
       try
-        var URL := LRepo.Replace('$(group)', FGroup.Replace('.', '/', [rfReplaceAll]), [rfReplaceAll, rfIgnoreCase]);
-        URL := URL.Replace('$(artifactId)', ArtifactId, [rfReplaceAll, rfIgnoreCase]);
-        URL := URL.Replace('$(version)', FVersion, [rfReplaceAll, rfIgnoreCase]);
-        URL := URL.Replace('$(compileVersion)', FVersion, [rfReplaceAll, rfIgnoreCase]);
-        URL := URL.Replace('$(type)', FType, [rfReplaceAll, rfIgnoreCase]);
-        Info('Begin download "%s"', [URL]);
+        var URL := ResolveURL(FRepo);
         ZipFile := HttpDownload(URL, DownloadDir);
-        Info('End download "%s"', [URL]);
         Result := True;
       except
         on E: Exception do begin
@@ -662,8 +682,6 @@ procedure TDependencie.DownloadPackage;
           Result := False;
         end;
       end;
-
-      if Result then Break;
     end;
   end;
 
@@ -1111,32 +1129,31 @@ begin
       FreeAndNil(Mapping);
   end;
   FreeAndNil(FProjects);
+
+  if FRootProject <> nil then
+    FreeAndNil(FRootProject);
+
   inherited;
 end;
 
 procedure TProjects.Init;
-var
-  ModServices: IOTAModuleServices;
-  Module: IOTAModule;
-  DelphiProject: IOTAProject;
-  ProjectGroup: IOTAProjectGroup;
-  Project: TProject;
 begin
-  ModServices := BorlandIDEServices as IOTAModuleServices;
-  for var i := 0 to ModServices.ModuleCount - 1 do
-  begin
-    Module := ModServices.Modules[i];
-    if Supports(Module, IOTAProjectGroup, ProjectGroup) then
-    begin
-      FProjectName := TPath.Combine(ExtractFileDir(Module.FileName), 'pom.xml');
-    end else if Supports(Module, IOTAProject, DelphiProject) then
-    begin
-      var ProjectName := TPath.Combine(ExtractFileDir(Module.FileName), 'pom.xml');
-      Project := TProject.Create(nil, ProjectName);
-      Project.LogMessage := ProjectLogMessage;
-      var Mapping := TProjectMapping.Create(Project, DelphiProject);
-      FProjects.Add(ProjectName, Mapping);
-    end;
+  var ModServices := BorlandIDEServices as IOTAModuleServices;
+  FRootProject := nil;
+  var ProjectGroup := ModServices.MainProjectGroup;
+  var LProjectName := ChangeFileExt(ProjectGroup.FileName, '.pom.xml');
+  if TFile.Exists(LProjectName) then begin
+    FRootProject := TProject.Create(nil, LProjectName);
+    FRootProject.Parse;
+  end;
+
+  for var I := 0 to ProjectGroup.ProjectCount-1 do begin
+    var DelphiProject := ProjectGroup.Projects[I];
+    LProjectName := ChangeFileExt(DelphiProject.FileName, '.pom.xml');
+    var LProject := TProject.Create(FRootProject, LProjectName);
+    LProject.LogMessage := ProjectLogMessage;
+    var Mapping := TProjectMapping.Create(LProject, DelphiProject);
+    FProjects.Add(LProjectName, Mapping);
   end;
 end;
 
@@ -1169,11 +1186,6 @@ begin
   FSearchPath.OutputMessage(Text, MessageContext);
 end;
 
-function TProjects.ToString: string;
-begin
-
-end;
-
 procedure TProjects.UpdateProjectLib(const AProjectName: string);
 var
   Mapping: TProjectMapping;
@@ -1197,14 +1209,12 @@ procedure TProjects.ParseProject(const AProjectName: string);
 var
   Mapping: TProjectMapping;
 begin
-  if TFile.Exists(AProjectName) and AProjectName.EndsWith('.xml', True) then begin
-    if FProjects.TryGetValue(AProjectName, Mapping) then begin
-      var ModuleInfo := Mapping.DelphiProject.FindModuleInfo(AProjectName);
-      if ModuleInfo <> nil then begin
-        ModuleInfo.OpenModule.Save(False, True);
-      end;
-      Mapping.Project.Parse;
+  if FProjects.TryGetValue(AProjectName, Mapping) then begin
+    var ModuleInfo := Mapping.DelphiProject.FindModuleInfo(AProjectName);
+    if ModuleInfo <> nil then begin
+      ModuleInfo.OpenModule.Save(False, True);
     end;
+    Mapping.Project.Parse;
   end;
 end;
 
@@ -1237,6 +1247,12 @@ end;
 
 { TRepositories }
 
+constructor TRepositories.Create(AProject: TProject; AElement: PsanXMLObjElement);
+begin
+  inherited Create(AProject, AElement);
+  FRepositories := TList<TRepository>.Create;
+end;
+
 destructor TRepositories.Destroy;
 begin
   if FRepositories <> nil then begin
@@ -1252,7 +1268,6 @@ procedure TRepositories.Parse;
 begin
   Debug('Begin process repositories');
   var Count := ChildCount;
-  if Count > 0 then FRepositories := TList<TRepository>.Create else FRepositories := nil;
   for var I := 0 to Count-1 do begin
     var RepositoryElement := GetElement(I);
     var Repository := TRepository.Create(Project, RepositoryElement);

@@ -3,7 +3,7 @@ unit SearchPath.Main;
 interface
 
 uses
-  System.Classes, System.Types, System.SysUtils, System.Variants, System.TypInfo,
+  System.Classes, System.Types, System.SysUtils, System.Variants, System.TypInfo, System.Generics.Collections,
   Vcl.Graphics, Vcl.Forms,
   ToolsAPI,
   SearchPath.Common;
@@ -17,6 +17,8 @@ type
     procedure OutputMessage(strText: string); overload;
     procedure OutputMessage(strText, StrFileName, StrPrefix: string; ILine, ICol: Integer); overload;
     procedure OutputMessage(AText: string; MessageContext: TMessageContext); overload;
+
+    procedure OnProjectRename(const OldFileName, NewFileName: string);
   private
     const MESSAGE_GROUP_NAME = 'Search Path';
   private
@@ -24,7 +26,7 @@ type
     function GetCurrentProject: string;
   public
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override;
   end;
 
   var SearchPathManager: ISearchPathManager;
@@ -34,9 +36,11 @@ procedure Register;
 implementation
 
 uses
+  System.IOUtils,
   System.UITypes,
   SearchPath.CustomMessage,
   SearchPath.EditorWindowNotifier,
+  SearchPath.FileNotifier,
   SearchPath.Wizard,
   SearchPath.Options,
   SearchPath.Project,
@@ -119,6 +123,7 @@ end;
 
 constructor TSearchPathManager.Create;
 begin
+  RegisterFileNotifier(Self);
   RegisterWizard(Self);
   RegisterEditorWindowNotifier(Self);
 end;
@@ -129,6 +134,8 @@ begin
 //  var G := Svc.GetGroup(MESSAGE_GROUP_NAME);
 //  if G <> nil then
 //    Svc.ClearMessageGroup(G);
+
+  inherited;
 end;
 
 function TSearchPathManager.GetCurrentProject: string;
@@ -176,11 +183,33 @@ begin
       end);
     end;
     atReArch: begin
-
+      ShowMessageView(True);
+      var Projects := TProjects.Create(Self);
+      try
+        //Self.OutputMessage(Projects.ProjectName);
+      finally
+        FreeAndNil(Projects);
+      end;
     end;
     else begin
       TFormOptions.Execute(Self);
     end;
+  end;
+end;
+
+procedure TSearchPathManager.OnProjectRename(const OldFileName, NewFileName: string);
+begin
+  Self.OutputMessage(Format('%s - %s', [OldFileName, NewFileName]));
+  var OldName := ChangeFileExt(OldFileName, '.pom.xml');
+  if not TFile.Exists(OldName) then Exit;
+  var NewName:= ChangeFileExt(NewFileName, '.pom.xml');
+
+  var Module := (BorlandIDEServices as IOTAModuleServices).FindModule(OldName);
+  if Module <> nil then begin
+    Module.FileName := NewName;
+    Module.Save(False, True);
+  end else begin
+    TFile.Move(OldName, NewName);
   end;
 end;
 

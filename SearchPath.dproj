@@ -76,8 +76,8 @@
         <VerInfo_Locale>2052</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_Description>Delphi search path setting tools</DCC_Description>
-        <DCC_UnitSearchPath>$(delphi-libs)\EtheaDev\SVGIconImageList\79105681e7e65790aa4d051ac800c6cf93a3e72e\Image32\Source;$(delphi-libs)\EtheaDev\SVGIconImageList\79105681e7e65790aa4d051ac800c6cf93a3e72e\Source;$(delphi-libs)\EtheaDev\SVGIconImageList\79105681e7e65790aa4d051ac800c6cf93a3e72e\Svg;$(delphi-libs)\exilon\QuickLib\3b4071a11c48f41788805f675d394079328f33c2;$(delphi-libs)\exilon\QuickLogger\9ca07ddcd15af4ec82eed54cdf17e639e6e96782;$(delphi-libs)\semin-alx\SAN_XML_Parser\444393c04c90f714846edddf8901e224e0c3e265\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DesignOnlyPackage>true</DesignOnlyPackage>
+        <DCC_UnitSearchPath>$(delphi-libs)\exilon\QuickLib\3b4071a11c48f41788805f675d394079328f33c2;$(delphi-libs)\exilon\QuickLogger\9ca07ddcd15af4ec82eed54cdf17e639e6e96782;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Android)'!=''">
         <DCC_CBuilderOutput>None</DCC_CBuilderOutput>
@@ -139,6 +139,7 @@
             <Form>FormOptions</Form>
         </DCCReference>
         <DCCReference Include="ToolsAPI\SearchPath.Wizard.pas"/>
+        <DCCReference Include="ToolsAPI\SearchPath.FileNotifier.pas"/>
         <DCCReference Include="ToolsAPI\SearchPath.EditorWindowNotifier.pas"/>
         <DCCReference Include="ToolsAPI\SearchPath.CustomMessage.pas"/>
         <DCCReference Include="SearchPath.Project.pas"/>
@@ -290,7 +291,6 @@
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>warn</ResourceId>
         </RcItem>
-        <None Include="pom.xml"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -312,10 +312,10 @@
                     <Source Name="MainSource">SearchPath.dpk</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k280.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp280.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k280.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp280.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k270.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp270.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k270.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp270.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">

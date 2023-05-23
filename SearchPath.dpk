@@ -39,6 +39,7 @@ contains
   SearchPath.Main in 'SearchPath.Main.pas',
   SearchPath.Options in 'SearchPath.Options.pas' {FormOptions},
   SearchPath.Wizard in 'ToolsAPI\SearchPath.Wizard.pas',
+  SearchPath.FileNotifier in 'ToolsAPI\SearchPath.FileNotifier.pas',
   SearchPath.EditorWindowNotifier in 'ToolsAPI\SearchPath.EditorWindowNotifier.pas',
   SearchPath.CustomMessage in 'ToolsAPI\SearchPath.CustomMessage.pas',
   SearchPath.Project in 'SearchPath.Project.pas',

@@ -102,4 +102,4 @@ lib/
 # Application bundle for Mac OS
 *.app/
 
-/pom.xml
+/SearchPath.pom.xml
