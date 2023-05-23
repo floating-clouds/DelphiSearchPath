@@ -628,7 +628,7 @@ procedure TDependencie.DownloadPackage;
         except
           on NetExcept: ENetHTTPClientException do begin
             TFile.Delete(tmpFile);
-            Error(NetExcept.Message);
+            raise Exception.Create(NetExcept.Message);
           end;
         end;
       finally
