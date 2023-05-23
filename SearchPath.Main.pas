@@ -183,12 +183,38 @@ begin
       end);
     end;
     atReArch: begin
-      ShowMessageView(True);
-      var Projects := TProjects.Create(Self);
-      try
-        //Self.OutputMessage(Projects.ProjectName);
-      finally
-        FreeAndNil(Projects);
+      var ModServices := BorlandIDEServices as IOTAModuleServices;
+      var ProjectGroup := ModServices.MainProjectGroup;
+      if not TFile.Exists(ProjectGroup.FileName) then begin
+        if not ProjectGroup.Save(True, True) then Exit;
+      end;
+
+      var P := ExtractFilePath(ProjectGroup.FileName);
+      for var I := 0 to ProjectGroup.ProjectCount-1 do begin
+        var DelphiProject := ProjectGroup.Projects[I];
+        if not TFile.Exists(DelphiProject.FileName) then begin
+          if not DelphiProject.Save(True, True) then Exit;
+        end;
+
+        var PrjPath := ExtractFilePath(DelphiProject.FileName);
+        var PrjName := ExtractFileName(DelphiProject.FileName);
+        var PrjDir := TPath.GetFileNameWithoutExtension(PrjName);
+
+        var NewProjectDir := TPath.Combine(P, PrjDir);
+        TDirectory.CreateDirectory(NewProjectDir);
+        DelphiProject.FileName := TPath.Combine(NewProjectDir, PrjName);
+        OutputMessage('New name: ' + DelphiProject.FileName);
+        DelphiProject.Save(False, True);
+
+        for var J := 0 to DelphiProject.GetModuleCount-1 do begin
+          var MI: IOTAModuleInfo := DelphiProject.GetModule(J);
+          if MI.FileName.StartsWith(PrjPath) then begin
+            var MN := TPath.Combine(NewProjectDir, MI.FileName.Substring(PrjPath.Length));
+            var M := MI.OpenModule;
+            M.FileName := MN;
+            M.Save(False, True);
+          end;
+        end;
       end;
     end;
     else begin
@@ -199,10 +225,9 @@ end;
 
 procedure TSearchPathManager.OnProjectRename(const OldFileName, NewFileName: string);
 begin
-  Self.OutputMessage(Format('%s - %s', [OldFileName, NewFileName]));
-  var OldName := ChangeFileExt(OldFileName, '.pom.xml');
+  var OldName := ChangeFileExt(OldFileName, POM_FILE_EXT);
   if not TFile.Exists(OldName) then Exit;
-  var NewName:= ChangeFileExt(NewFileName, '.pom.xml');
+  var NewName:= ChangeFileExt(NewFileName, POM_FILE_EXT);
 
   var Module := (BorlandIDEServices as IOTAModuleServices).FindModule(OldName);
   if Module <> nil then begin

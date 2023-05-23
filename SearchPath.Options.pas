@@ -77,7 +77,7 @@ begin
     ThemingServices.ApplyTheme(Self);
   end;
   FActiveProject := GetActiveProject;
-  FPOMName:= ChangeFileExt(FActiveProject.FileName, '.pom.xml');
+  FPOMName:= ChangeFileExt(FActiveProject.FileName, POM_FILE_EXT);
   var ModuleInfo := FActiveProject.FindModuleInfo(FPOMName);
   if ModuleInfo <> nil then
     ModuleInfo.OpenModule.Show;

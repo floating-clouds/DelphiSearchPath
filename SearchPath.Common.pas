@@ -11,6 +11,7 @@ uses
 const
   LIBS_ROOT_KEY = 'delphi-libs';
   LIBS_ROOT_DEFAULT = '.\libs\';
+  POM_FILE_EXT = '.pom.xml';
 
 type
   TActionType = (atUpdate = 0, atApply = 1, atOption = 2, atDelete = 3, atAdd = 4, atHardDelete = 5, atEnvList = 6, atReArch);

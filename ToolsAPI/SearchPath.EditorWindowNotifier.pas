@@ -110,7 +110,7 @@ begin
   if LastActiveWindow <> EditWindow.Form.Caption then begin
     LastActiveWindow := EditWindow.Form.Caption;
 
-    IsPomView := LastActiveWindow.EndsWith('.pom.xml', True) and (GetActiveProject.FindModuleInfo(LastActiveWindow) <> nil);
+    IsPomView := LastActiveWindow.EndsWith(POM_FILE_EXT, True) and (GetActiveProject.FindModuleInfo(LastActiveWindow) <> nil);
 
     Ctrl := EditWindow.Form;
     if not Assigned(Ctrl) then

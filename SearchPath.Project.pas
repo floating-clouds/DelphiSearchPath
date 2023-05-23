@@ -1141,7 +1141,7 @@ begin
   var ModServices := BorlandIDEServices as IOTAModuleServices;
   FRootProject := nil;
   var ProjectGroup := ModServices.MainProjectGroup;
-  var LProjectName := ChangeFileExt(ProjectGroup.FileName, '.pom.xml');
+  var LProjectName := ChangeFileExt(ProjectGroup.FileName, POM_FILE_EXT);
   if TFile.Exists(LProjectName) then begin
     FRootProject := TProject.Create(nil, LProjectName);
     FRootProject.Parse;
@@ -1149,7 +1149,7 @@ begin
 
   for var I := 0 to ProjectGroup.ProjectCount-1 do begin
     var DelphiProject := ProjectGroup.Projects[I];
-    LProjectName := ChangeFileExt(DelphiProject.FileName, '.pom.xml');
+    LProjectName := ChangeFileExt(DelphiProject.FileName, POM_FILE_EXT);
     var LProject := TProject.Create(FRootProject, LProjectName);
     LProject.LogMessage := ProjectLogMessage;
     var Mapping := TProjectMapping.Create(LProject, DelphiProject);
